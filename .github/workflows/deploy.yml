@@ -30,7 +30,7 @@ jobs:
         run: |
           # Если есть .env.example в корне родительского репозитория
           if [ -f .env.example ]; then
-            cp .env.example backend/.env
+            cp .env.example .env
           else
             # Минимальный .env для тестов
             cat > backend/.env << 'EOF'
