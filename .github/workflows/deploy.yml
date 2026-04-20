@@ -26,21 +26,8 @@ jobs:
           pip install uv
           uv sync --frozen --dev
 
-      - name: Create .env for backend tests
-        run: |
-          # Если есть .env.example в корне родительского репозитория
-          if [ -f .env.example ]; then
-            cp .env.example .env
-          else
-            # Минимальный .env для тестов
-            cat > backend/.env << 'EOF'
-            DB_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/testdb
-            ACCESS_TOKEN_EXPIRE_MINUTES=30
-            REFRESH_TOKEN_EXPIRE_MINUTES=1440
-            SECRET_KEY=testsecretkey
-            ALGORITHM=HS256
-            EOF
-          fi
+      - name: Copy .env.example to .env
+        run: cp .env.example backend/.env
 
       - name: Lint backend (ruff)
         run: |
