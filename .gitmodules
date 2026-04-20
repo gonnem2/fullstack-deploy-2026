@@ -1,7 +1,7 @@
 [submodule "backend"]
 	path = backend
 	url = https://github.com/gonnem2/fullstack
-	branch = main
+	branch = master
 [submodule "frontend"]
 	path = frontend
 	url = https://github.com/gonnem2/fullstack-2026-frontend
