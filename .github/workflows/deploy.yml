@@ -14,6 +14,7 @@ jobs:
         with:
           submodules: recursive
 
+      # ----- Backend -----
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -25,17 +26,17 @@ jobs:
           pip install uv
           uv sync --frozen --dev
 
-      - name: Lint backend
+      - name: Lint backend (ruff)
         run: |
           cd backend
           uv run ruff check .
-          uv run mypy app || true  # если mypy не настроен, можно убрать
 
-      - name: Test backend
+      - name: Run backend tests (pytest)
         run: |
           cd backend
-          uv run pytest || true    # если тестов нет, можно закомментировать
+          uv run pytest
 
+      # ----- Frontend -----
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -46,17 +47,22 @@ jobs:
           cd frontend
           npm ci
 
-      - name: Lint frontend
+      - name: Lint frontend (eslint)
         run: |
           cd frontend
-          npm run lint || true
+          npm run lint
 
-      - name: Test frontend
+      - name: Run frontend unit tests
         run: |
           cd frontend
-          npm test || true
+          npm run test
 
-      - name: Build frontend
+      - name: Run frontend e2e tests
+        run: |
+          cd frontend
+          npm run test:e2e
+
+      - name: Build frontend (production)
         run: |
           cd frontend
           npm run build
@@ -81,7 +87,7 @@ jobs:
         with:
           context: ./backend
           push: true
-          tags: yourusername/financetrack-backend:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/financetrack-backend:latest
 
       - name: Build and push nginx (frontend+proxy)
         uses: docker/build-push-action@v5
@@ -89,22 +95,4 @@ jobs:
           context: .
           file: Dockerfile.nginx
           push: true
-          tags: yourusername/financetrack-nginx:latest
-
-#  deploy:
-#    needs: build-and-push
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Deploy to server
-#        uses: appleboy/ssh-action@v1.0.0
-#        with:
-#          host: ${{ secrets.SERVER_HOST }}
-#          username: ${{ secrets.SERVER_USER }}
-#          key: ${{ secrets.SSH_PRIVATE_KEY }}
-#          script: |
-#            cd /opt/financetrack
-#            git pull
-#            git submodule update --init --recursive
-#            docker compose pull
-#            docker compose up -d --force-recreate
-#            docker system prune -f
+          tags: ${{ secrets.DOCKER_USERNAME }}/financetrack-nginx:latest
